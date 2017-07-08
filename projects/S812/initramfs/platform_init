@@ -1,24 +1,7 @@
 #!/bin/sh
 
-################################################################################
-#      This file is part of OpenELEC - http://www.openelec.tv
-#      Copyright (C) 2014 Alex Deryskyba (alex@codesnake.com)
-#
-#  OpenELEC is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  OpenELEC is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with OpenELEC.  If not, see <http://www.gnu.org/licenses/>.
-################################################################################
-
-hdmimode=720p
+hdmimode=1080p60hz
+#$(cat /sys/class/display/mode)
 
 # Parse command line arguments
 for arg in $(cat /proc/cmdline); do
@@ -27,7 +10,7 @@ for arg in $(cat /proc/cmdline); do
       hdmitx=${arg#*=}
       ;;
     hdmimode=*)
-      hdmimode=${arg#*=}
+      display_mode=${arg#*=}
       ;;
     BOOT_IMAGE=*)
       BOOT_IMAGE=${arg#*=}
@@ -48,12 +31,35 @@ if [ -z "$BOOT_IMAGE" -o -z "$boot" -o -z "$disk" ]; then
   echo "$cmdline" > /proc/cmdline
 fi
 
-echo "$hdmimode" > /sys/class/display/mode
+# Set framebuffer geometry to match the resolution
+case $hdmimode in
+  480*)            X=720  Y=480  ;;
+  576*)            X=720  Y=576  ;;
+  720p*)           X=1280 Y=720  ;;
+  *)               X=1920 Y=1080 ;;
+esac
 
-# Force enable CEC if configuration parameter not present or empty
-if [ -z "$hdmitx" ]; then
-  echo 0xf > /sys/class/amhdmitx/amhdmitx0/cec_config
-fi
+fbset -fb /dev/fb0 -g $X $Y 1920 2160 32
+fbset -fb /dev/fb1 -g 32 32 32 32 32
+echo $hdmimode > /sys/class/display/mode
+echo 0 > /sys/class/graphics/fb0/free_scale
+echo 0 > /sys/class/graphics/fb1/free_scale
+echo 1 > /sys/class/video/disable_video
+
+# Enable scaling for 4K output
+case $hdmimode in
+  4k*|smpte*|2160*)
+    echo 0 0 1919 1079 > /sys/class/graphics/fb0/free_scale_axis
+    echo 0 0 3839 2159 > /sys/class/graphics/fb0/window_axis
+    echo 1920 > /sys/class/graphics/fb0/scale_width
+    echo 1080 > /sys/class/graphics/fb0/scale_height
+    echo 0x10001 > /sys/class/graphics/fb0/free_scale
+  ;;
+esac
+
+# Include deinterlacer into default VFM map
+echo rm default > /sys/class/vfm/map
+echo add default decoder ppmgr deinterlace amvideo > /sys/class/vfm/map
 
 # Enable framebuffer device
 echo 0 > /sys/class/graphics/fb0/blank
@@ -61,24 +67,11 @@ echo 0 > /sys/class/graphics/fb0/blank
 # Blank fb1 to prevent static noise
 echo 1 > /sys/class/graphics/fb1/blank
 
-# Disable framebuffer scaling
-echo 0 > /sys/class/graphics/fb0/free_scale
-echo 0 > /sys/class/graphics/fb1/free_scale
-
-# Set framebuffer geometry to match the resolution
-case "$hdmimode" in
-  720*)
-    fbset -fb /dev/fb0 -g 1280 720 1920 2160 32
-    ;;
-  1080*)
-    fbset -fb /dev/fb0 -g 1920 1080 1920 2160 32
-    ;;
-esac
-
-# Include deinterlacer into default VFM map
-echo rm default > /sys/class/vfm/map
-echo add default decoder ppmgr deinterlace amvideo > /sys/class/vfm/map
-
 for part in /sys/block/*/queue/add_random; do
   echo 0 > "$part"
 done
+
+# DEC_CONTROL_FLAG_DISABLE_FAST_POC
+echo 4 > /sys/module/amvdec_h264/parameters/dec_control
+
+echo 1 > /sys/devices/system/cpu/cpufreq/ondemand/io_is_busy

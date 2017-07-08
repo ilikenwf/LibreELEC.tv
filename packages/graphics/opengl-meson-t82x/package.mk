@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="opengl-meson-t82x"
-PKG_ARCH="arm"
+PKG_ARCH="arm aarch64"
 PKG_LICENSE="nonfree"
 PKG_SITE="https://github.com/kszaq/opengl-meson-t82x"
 PKG_DEPENDS_TARGET="toolchain libhybris"

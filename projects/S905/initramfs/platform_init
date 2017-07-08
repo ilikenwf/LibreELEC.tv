@@ -36,7 +36,7 @@ esac
 
 fbset -fb /dev/fb0 -g $X $Y 1920 2160 32
 fbset -fb /dev/fb1 -g 32 32 32 32 32
-# echo $hdmimode > /sys/class/display/mode
+echo $hdmimode > /sys/class/display/mode
 echo 0 > /sys/class/graphics/fb0/free_scale
 echo 0 > /sys/class/graphics/fb1/free_scale
 echo 1 > /sys/class/video/disable_video
@@ -75,3 +75,8 @@ done
 echo 2 > /proc/irq/231/smp_affinity  # hdmi_aocec
 echo 4 > /proc/irq/63/smp_affinity   # dwc_otg, dwc_otg_hcd:usb1
 echo 8 > /proc/irq/62/smp_affinity   # dwc_otg, dwc_otg_hcd:usb2, dwc_otg_pcd
+
+# DEC_CONTROL_FLAG_DISABLE_FAST_POC
+echo 4 > /sys/module/amvdec_h264/parameters/dec_control
+
+echo 1 > /sys/devices/system/cpu/cpufreq/ondemand/io_is_busy

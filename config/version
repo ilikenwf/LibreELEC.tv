@@ -1,18 +1,5 @@
 # VERSION: set full version, use "devel" for development version
-  case $PROJECT in
-    S805)
-      LIBREELEC_VERSION="7.0.2.7"
-      ;;
-    S812)
-      LIBREELEC_VERSION="17.3"
-      ;;
-    S905)
-      LIBREELEC_VERSION="17.3"
-      ;;
-    *)
-      LIBREELEC_VERSION="devel"
-      ;;
-  esac
+  LIBREELEC_VERSION="17.3_20170704"
 
 # OS_VERSION: OS Version
   OS_VERSION="8.0"
