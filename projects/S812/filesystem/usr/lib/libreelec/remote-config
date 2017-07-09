@@ -21,7 +21,10 @@
 SOURCEREMOTECONF=""
 REMAP="no"
 
-if [ -f /storage/.config/remote.conf ]; then
+if [ -f /var/media/LIBREELEC/remote.conf ]; then
+  SOURCEREMOTECONF="/var/media/LIBREELEC/"
+  REMAP="yes"
+elif [ -f /storage/.config/remote.conf ]; then
   SOURCEREMOTECONF="/storage/.config"
   REMAP="yes"
 elif [ -f /flash/remote.conf ]; then
