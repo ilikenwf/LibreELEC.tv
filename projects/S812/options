@@ -35,7 +35,7 @@
   # Kernel to use. values can be:
   # default:  default mainline kernel
     LINUX="custom"
-    KERNEL_VERSION="4c08d72"
+    KERNEL_VERSION="415ff35"
     KERNEL_URL="https://github.com/kszaq/linux/archive/$KERNEL_VERSION.tar.gz"
 
 ################################################################################
@@ -127,8 +127,8 @@
     KERNEL_NAME="kernel.img"
 
   # set the addon dirs
-    ADDON_PATH="$ADDON_VERSION/WeTek_Play/$TARGET_ARCH"
-    ADDON_URL="$ADDON_SERVER_URL/$ADDON_PATH"
+    ADDON_SERVER_URL="http://kszaq.libreelec.tv/addons"
+    ADDON_URL="8.1/S805/arm"
 
   # OEM packages for OEM's (yes / no)
     OEM_SUPPORT="yes"
