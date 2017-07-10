@@ -1,10 +1,10 @@
 #amlogic NEC remote for bcm4335 M8S - different from M8SPlus
 factory_code	= 0xfe010001 
 work_mode  		= 0
-repeat_enable = 1
-repeat_delay = 40
-repeat_peroid = 39
-release_delay	=	121
+repeat_enable   = 1
+repeat_delay    = 40
+repeat_peroid   = 39
+release_delay	= 121
 debug_enable 	= 1
 
 fn_key_scancode    = 0x00
@@ -24,12 +24,14 @@ mouse_begin
 mouse_end
 
 key_begin
+		0x004d 135 ;subtitle internet button
 		0x40 116
-		0x4d 70
 		0x41 113
-		0x4c 109
-		0x11 104
+		0x4c 74
+		0x11 48
 		0x10 125
+        0x18 172 ;Home
+        0x10 46  ;Menu
 		0x18 102
 		0x19 1
 		0x16 103
@@ -56,7 +58,6 @@ repeat_key_begin
 		0x41 113
 		0x4c 109
 		0x11 104
-		0x10 125
 		0x18 102
 		0x19 1
 		0x16 103

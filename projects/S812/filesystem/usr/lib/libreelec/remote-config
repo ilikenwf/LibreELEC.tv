@@ -21,15 +21,15 @@
 SOURCEREMOTECONF=""
 REMAP="no"
 
+# if you're having problems, try setting remap=yes manually by executing as seen toward the bottom
+# i have defaulted it to no again as the bcm4335 remote works fine without remapping
+
 if [ -f /var/media/LIBREELEC/remote.conf ]; then
   SOURCEREMOTECONF="/var/media/LIBREELEC/"
-  REMAP="yes"
 elif [ -f /storage/.config/remote.conf ]; then
   SOURCEREMOTECONF="/storage/.config"
-  REMAP="yes"
 elif [ -f /flash/remote.conf ]; then
   SOURCEREMOTECONF="/flash"
-  REMAP="yes"
 elif [ -f /etc/amremote/remote.conf ]; then
   SOURCEREMOTECONF="/etc/amremote"
 elif ! grep -q /dev/system /proc/mounts ; then
@@ -45,7 +45,6 @@ elif ! grep -q /dev/system /proc/mounts ; then
     SOURCEREMOTECONF="/flash"
   done
   umount /tmp/system
-  REMAP="yes"
 fi
 
 if [ -n "$SOURCEREMOTECONF" ]; then
