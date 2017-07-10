@@ -46,6 +46,10 @@ echo 0 > /sys/class/graphics/fb0/free_scale
 echo 0 > /sys/class/graphics/fb1/free_scale
 echo 1 > /sys/class/video/disable_video
 
+# Attempt to fix MPEG-TS stream lost packet (HDMI-CEC irq issue)
+# http://forum.odroid.com/viewtopic.php?p=155840#p155840
+echo 2 > /proc/irq/231/smp_affinity
+
 # Enable scaling for 4K output
 case $hdmimode in
   4k*|smpte*|2160*)
