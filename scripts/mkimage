@@ -34,7 +34,9 @@
 
   STORAGE_SIZE=32 # STORAGE_SIZE must be >= 32 !
 
-  DISK_SIZE=$(( $SYSTEM_SIZE + $STORAGE_SIZE + 4 ))
+  DISK_START_PADDING=$(( ($SYSTEM_PART_START + 2048 - 1) / 2048 ))
+  DISK_GPT_PADDING=1
+  DISK_SIZE=$(( $DISK_START_PADDING + $SYSTEM_SIZE + $STORAGE_SIZE + $DISK_GPT_PADDING ))
   DISK="$TARGET_IMG/$IMAGE_NAME.img"
 
 # functions
@@ -80,7 +82,7 @@ trap cleanup SIGINT
 
 # create part1
   echo "image: creating part1..."
-  SYSTEM_PART_END=$(( ($SYSTEM_SIZE * 1024 * 1024 / 512) + $SYSTEM_PART_START ))
+  SYSTEM_PART_END=$(( $SYSTEM_PART_START + ($SYSTEM_SIZE * 1024 * 1024 / 512) - 1 ))
   parted -s "$DISK" -a min unit s mkpart primary fat32 $SYSTEM_PART_START $SYSTEM_PART_END
   if [ "$BOOTLOADER" = "syslinux" ]; then
     parted -s "$DISK" set 1 legacy_boot on
@@ -88,17 +90,18 @@ trap cleanup SIGINT
     parted -s "$DISK" set 1 boot on
   fi
   sync
+
 # create part2
   echo "image: creating part2..."
-  STORAGE_PART_START=$(( $SYSTEM_PART_END + 2048 ))
-  STORAGE_PART_END=$(( $STORAGE_PART_START + (( $STORAGE_SIZE * 1024 * 1024 / 512 )) ))
+  STORAGE_PART_START=$(( $SYSTEM_PART_END + 1 ))
+  STORAGE_PART_END=$(( $STORAGE_PART_START + ($STORAGE_SIZE * 1024 * 1024 / 512) - 1 ))
   parted -s "$DISK" -a min unit s mkpart primary ext4 $STORAGE_PART_START $STORAGE_PART_END
   sync
 
 if [ "$BOOTLOADER" = "syslinux" ]; then
   # write mbr
     echo "image: writing mbr..."
-    MBR="$ROOT/$TOOLCHAIN/share/syslinux/gptmbr.bin"
+    MBR="$TOOLCHAIN/share/syslinux/gptmbr.bin"
     if [ -n "$MBR" ]; then
       dd bs=440 count=1 conv=fsync,notrunc if="$MBR" of="$DISK" >"$SAVE_ERROR" 2>&1 || show_error
     fi
@@ -145,18 +148,6 @@ LABEL run
   APPEND boot=UUID=$UUID_SYSTEM disk=UUID=$UUID_STORAGE portable quiet
 EOF
 
-  if [ "$PROJECT" = Virtual ]; then
-    cat << EOF > "$LE_TMP"/syslinux.cfg
-DEFAULT virtual
-TIMEOUT 50
-PROMPT 0
-
-LABEL virtual
-  KERNEL /$KERNEL_NAME
-  APPEND boot=UUID=$UUID_SYSTEM disk=UUID=$UUID_STORAGE quiet tty vga=current
-EOF
-  fi
-
     mcopy "$LE_TMP/syslinux.cfg" ::
 
   # install extlinux
@@ -171,8 +162,8 @@ EOF
     mcopy $RELEASE_DIR/target/SYSTEM.md5 ::/SYSTEM.md5
 
     mmd EFI EFI/BOOT
-    mcopy $ROOT/$TOOLCHAIN/share/syslinux/bootx64.efi ::/EFI/BOOT
-    mcopy $ROOT/$TOOLCHAIN/share/syslinux/ldlinux.e64 ::/EFI/BOOT
+    mcopy $TOOLCHAIN/share/syslinux/bootx64.efi ::/EFI/BOOT
+    mcopy $TOOLCHAIN/share/syslinux/ldlinux.e64 ::/EFI/BOOT
     mcopy "$LE_TMP"/syslinux.cfg ::/EFI/BOOT
 elif [ "$BOOTLOADER" = "bcm2835-bootloader" ]; then
   # create bootloader configuration
@@ -195,7 +186,7 @@ EOF
     mcopy $RELEASE_DIR/3rdparty/bootloader/start.elf ::
     mcopy $RELEASE_DIR/3rdparty/bootloader/config.txt ::
     mcopy $RELEASE_DIR/3rdparty/bootloader/distroconfig.txt ::
- 
+
     if [ -f $RELEASE_DIR/3rdparty/bootloader/dt-blob.bin ]; then
       mcopy $RELEASE_DIR/3rdparty/bootloader/dt-blob.bin ::
     fi
@@ -275,12 +266,14 @@ fi # bootloader
 
 echo "image: make autoscript..."
 
-for src in $INSTALL_SRC_DIR/*autoscript.src ; do
-  if [ -e "$src" ] ; then
-    $MKIMAGE_TOOL_CMD "$src" "$LE_TMP/$(basename $src .src)"
-    mcopy "$LE_TMP/$(basename $src .src)" ::
-  fi
-done
+if [ "$UBOOT_VERSION" != "hardkernel" ]; then
+  for src in $INSTALL_SRC_DIR/*autoscript*.src ; do
+    if [ -e "$src" ] ; then
+      $MKIMAGE_TOOL_CMD "$src" "$LE_TMP/$(basename $src .src)"
+      mcopy "$LE_TMP/$(basename $src .src)" ::
+    fi
+  done
+fi
 
 if [ -f "$INSTALL_SRC_DIR/install.sh" ]; then
   mcopy "$INSTALL_SRC_DIR/install.sh" "::/install.sh"
@@ -325,7 +318,6 @@ done
   echo "image: merging part2 back to image..."
   dd if="$LE_TMP/part2.ext4" of="$DISK" bs=512 seek="$STORAGE_PART_START" conv=fsync,notrunc >"$SAVE_ERROR" 2>&1 || show_error
 
-
 # extract part1 from image to run fsck
   echo "image: extracting part1 from image..."
   SYSTEM_PART_COUNT=$(( $SYSTEM_PART_END - $SYSTEM_PART_START + 1 ))
@@ -334,15 +326,34 @@ done
   echo "image: checking filesystem on part1..."
   fsck -n $LE_TMP/part1.fat >"$SAVE_ERROR" 2>&1 || show_error
 
-# create virtual images
-  if [ "$PROJECT" = Virtual ]; then
+# create virtual image
+  if [ "$PROJECT" = "Generic" ]; then
     echo "image: creating open virtual appliance..."
-    qemu-img convert -O vmdk -o subformat=streamOptimized "$DISK" "$DISK.vmdk"
-    sed -e "s,@DISTRO@,$DISTRO,g" -e "s,@DISK@,$(basename $DISK),g" -e "s,@DISK_SIZE@,$(ls -l $DISK.vmdk | awk '{print $5}'),g" $PROJECT_DIR/$PROJECT/config/ovf.template > $DISK.ovf
-    tar -C $TARGET_IMG -cf $DISK.ova $(basename $DISK).ovf $(basename $DISK).vmdk
+    # duplicate $DISK so anything we do to it directly doesn't effect original
+    dd if="$DISK" of="${DISK/img/tmp}" bs=1M >"$SAVE_ERROR" 2>&1 || show_error
+    # change syslinux default to 'run'
+    echo "image: modifying fs on part1 for open virtual appliance..."
+    sed -i "/DEFAULT/ s/installer/run/" "$LE_TMP"/syslinux.cfg
+    # FIXME: an unalias should work here, but it does not; call mcopy directly
+    $TOOLCHAIN/bin/mcopy -i $LE_TMP/part1.fat -o "$LE_TMP"/syslinux.cfg ::/EFI/BOOT
+    $TOOLCHAIN/bin/mcopy -i $LE_TMP/part1.fat -o "$LE_TMP"/syslinux.cfg ::
+    sync
+    # merge modified part1 back to tmp disk image
+    echo "image: merging part1 back to open virtual appliance..."
+    dd if="$LE_TMP/part1.fat" of="${DISK/img/tmp}" bs=512 seek="$SYSTEM_PART_START" conv=fsync,notrunc >"$SAVE_ERROR" 2>&1 || show_error
+    # create vmdk from tmp $DISK
+    qemu-img convert -O vmdk -o subformat=streamOptimized "${DISK/img/tmp}" "${DISK/img/vmdk}"
+    # generate ovf from template
+    sed -e "s,@DISTRO@,$DISTRO,g" -e "s,@DISK@,$(basename ${DISK/.img}),g" \
+        -e "s,@DISK_SIZE@,$(($DISK_SIZE*1024*1024)),g" \
+        $PROJECT_DIR/$PROJECT/config/ovf.template > ${DISK/img/ovf}
+    # combine ovf and vmdk into official ova
+    tar -C $TARGET_IMG -cf ${DISK/img/ova} $(basename ${DISK/img/ovf}) $(basename ${DISK/img/vmdk})
     echo "image: cleaning up..."
-    rm $DISK.vmdk $DISK.ovf
-    [ -n "$SUDO_USER" ] && chown $SUDO_USER: $DISK.ova
+    # remove tmp $DISK, vmdk and ovf
+    rm ${DISK/img/tmp} ${DISK/img/vmdk} ${DISK/img/ovf}
+    # set owner
+    [ -n "$SUDO_USER" ] && chown $SUDO_USER: ${DISK/img/ova}
   fi
 
 # gzip

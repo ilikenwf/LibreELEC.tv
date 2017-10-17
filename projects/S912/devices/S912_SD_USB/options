@@ -1,0 +1,12 @@
+  # Kernel and u-boot options
+    case $SYSTEM in
+      VEGAS96)
+        KERNEL_UBOOT_EXTRA_TARGET="vega-s96.dtb"
+        ;;
+      KVIM2)
+        KERNEL_UBOOT_EXTRA_TARGET="kvim2.dtb"
+        ;;
+      *)
+        KERNEL_UBOOT_EXTRA_TARGET="gxm_q200_2g.dtb gxm_q201_1g.dtb gxm_q201_2g.dtb"
+        ;;
+    esac

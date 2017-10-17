@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="media_build"
-PKG_VERSION="2017-06-20-rpi"
+PKG_VERSION="2017-04-17-rpi"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/crazycat69/linux_media"
@@ -33,7 +33,7 @@ PKG_AUTORECONF="no"
 
 if [ "$TARGET_KERNEL_ARCH" = "arm64" -a "$TARGET_ARCH" = "arm" ]; then
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET gcc-linaro-aarch64-linux-gnu:host"
-  export PATH=$ROOT/$TOOLCHAIN/lib/gcc-linaro-aarch64-linux-gnu/bin/:$PATH
+  export PATH=$TOOLCHAIN/lib/gcc-linaro-aarch64-linux-gnu/bin/:$PATH
   TARGET_PREFIX=aarch64-linux-gnu-
 fi
 
@@ -54,7 +54,7 @@ make_target() {
     if [ -f $PKG_DIR/config/generic.config ]; then
       cp $PKG_DIR/config/generic.config v4l/.config
     fi
-  elif [ "$PROJECT" != "S805" ] && [ "$PROJECT" != "S812" ] && [ "$PROJECT" != "S905" ] && [ "$PROJECT" != "S912" ]; then
+  elif [ "$PROJECT" != "S805" ] && [ "$PROJECT" != "S905" ] && [ "$PROJECT" != "S912" ]; then
     if [ -f $PKG_DIR/config/usb.config ]; then
       cp $PKG_DIR/config/usb.config v4l/.config
     fi
@@ -85,10 +85,9 @@ make_target() {
       cp -a "$DVB_TV_AML_DIR" "linux/drivers/media/dvb_tv"
       echo "obj-y += dvb_tv/" >> "linux/drivers/media/Makefile"
     fi 
-    echo "obj-y += amlogic/dvb_tv/" >> "linux/drivers/media/Makefile"
-
-  # Meson-IR driver
-    echo "obj-m += meson-ir.o" >> "linux/drivers/media/rc/Makefile"
+    if [ "$PROJECT" = "S905" ]; then
+      echo "obj-y += amlogic/dvb_tv/" >> "linux/drivers/media/Makefile"
+    fi
   fi
 
   make VER=$KERNEL_VER SRCDIR=$(kernel_path)
@@ -96,5 +95,5 @@ make_target() {
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/modules/$KERNEL_VER/updates
-  find $ROOT/$PKG_BUILD/v4l/ -name \*.ko -exec cp {} $INSTALL/usr/lib/modules/$KERNEL_VER/updates \;
+  find $PKG_BUILD/v4l/ -name \*.ko -exec cp {} $INSTALL/usr/lib/modules/$KERNEL_VER/updates \;
 }

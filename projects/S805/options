@@ -38,6 +38,9 @@
       m201d)
         KERNEL_UBOOT_EXTRA_TARGET="meson8b_m201d.dtd meson8b_m201d.dtb"
         ;;
+      m201)
+        KERNEL_UBOOT_EXTRA_TARGET="meson8b_m201_1G.dtd meson8b_m201_1G.dtb"
+        ;;
     esac
 
   # Build Android kernel image using mkbootimg
@@ -52,7 +55,7 @@
   # Kernel to use. values can be:
   # default:  default mainline kernel
     LINUX="custom"
-    KERNEL_VERSION="415ff35"
+    KERNEL_VERSION="1be06c2"
     KERNEL_URL="https://github.com/kszaq/linux/archive/$KERNEL_VERSION.tar.gz"
 
 ################################################################################
@@ -105,7 +108,8 @@
   # for a list of additinoal drivers see packages/linux-drivers
   # Space separated list is supported,
   # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-    ADDITIONAL_DRIVERS="RTL8192CU RTL8192DU RTL8192EU RTL8812AU mt7610u mt7601u-aml"
+    ADDITIONAL_DRIVERS="RTL8192CU RTL8192DU RTL8192EU RTL8812AU mt7610u media_build \
+                        mt7601u-aml RTL8188EU-aml RTL8189ES-aml RTL8189FS-aml RTL8723BS-aml RTL8822BU-aml ssv6xxx-aml"
 
   # additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
   # Space separated list is supported,

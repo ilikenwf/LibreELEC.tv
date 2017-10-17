@@ -194,6 +194,7 @@ post_makeinstall_target() {
   rm -rf $INSTALL/usr/bin/systemd-machine-id-setup
   mkdir -p $INSTALL/usr/bin
   cp $PKG_DIR/scripts/systemd-machine-id-setup $INSTALL/usr/bin
+  cp $PKG_DIR/scripts/userconfig-setup $INSTALL/usr/bin
 
   # provide 'halt', 'shutdown', 'reboot' & co.
   mkdir -p $INSTALL/usr/sbin
@@ -213,6 +214,8 @@ post_makeinstall_target() {
 
   rm -rf $INSTALL/etc/modules-load.d
   ln -sf /storage/.config/modules-load.d $INSTALL/etc/modules-load.d
+  rm -rf $INSTALL/etc/systemd/sleep.conf.d
+  ln -sf /storage/.config/sleep.conf.d $INSTALL/etc/systemd/sleep.conf.d
   rm -rf $INSTALL/etc/sysctl.d
   ln -sf /storage/.config/sysctl.d $INSTALL/etc/sysctl.d
   rm -rf $INSTALL/etc/tmpfiles.d

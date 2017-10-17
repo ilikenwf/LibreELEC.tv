@@ -1,28 +1,36 @@
 #!/bin/sh
 
-hdmimode=1080p60hz
-#$(cat /sys/class/display/mode)
+display_mode=$(cat /sys/class/display/mode)
+
+if [ -z "$display_mode" ]; then
+    display_mode="720p"
+fi
 
 # Parse command line arguments
 for arg in $(cat /proc/cmdline); do
-  case ${arg} in
+  case $arg in
     hdmitx=*)
-      hdmitx=${arg#*=}
+      hdmitx="${arg#*=}"
       ;;
     hdmimode=*)
-      display_mode=${arg#*=}
+      display_mode="${arg#*=}"
       ;;
     BOOT_IMAGE=*)
-      BOOT_IMAGE=${arg#*=}
+      BOOT_IMAGE="${arg#*=}"
       ;;
     boot=*)
-      boot=${arg#*=}
+      boot="${arg#*=}"
       ;;
     disk=*)
-      disk=${arg#*=}
+      disk="${arg#*=}"
       ;;
   esac
 done
+
+# Enable HDMI output if cable is connected and not already enabled by u-boot
+#if [ "$(cat /sys/class/amhdmitx/amhdmitx0/hpd_state)" != "0" ] && [ "$display_mode" != "$hdmimode" ]; then
+#  display_mode="$hdmimode"
+#fi
 
 # Add information where to run LibreELEC from
 if [ -z "$BOOT_IMAGE" -o -z "$boot" -o -z "$disk" ]; then
@@ -31,8 +39,13 @@ if [ -z "$BOOT_IMAGE" -o -z "$boot" -o -z "$disk" ]; then
   echo "$cmdline" > /proc/cmdline
 fi
 
+# Force enable CEC if configuration parameter not present or empty
+if [ -z "$hdmitx" ]; then
+  echo 0xf > /sys/class/amhdmitx/amhdmitx0/cec_config
+fi
+
 # Set framebuffer geometry to match the resolution
-case $hdmimode in
+case $display_mode in
   480*)            X=720  Y=480  ;;
   576*)            X=720  Y=576  ;;
   720p*)           X=1280 Y=720  ;;
@@ -41,7 +54,7 @@ esac
 
 fbset -fb /dev/fb0 -g $X $Y 1920 2160 32
 fbset -fb /dev/fb1 -g 32 32 32 32 32
-echo $hdmimode > /sys/class/display/mode
+echo $display_mode > /sys/class/display/mode
 echo 0 > /sys/class/graphics/fb0/free_scale
 echo 0 > /sys/class/graphics/fb1/free_scale
 echo 1 > /sys/class/video/disable_video
@@ -51,7 +64,7 @@ echo 1 > /sys/class/video/disable_video
 echo 2 > /proc/irq/231/smp_affinity
 
 # Enable scaling for 4K output
-case $hdmimode in
+case $display_mode in
   4k*|smpte*|2160*)
     echo 0 0 1919 1079 > /sys/class/graphics/fb0/free_scale_axis
     echo 0 0 3839 2159 > /sys/class/graphics/fb0/window_axis
@@ -74,8 +87,5 @@ echo 1 > /sys/class/graphics/fb1/blank
 for part in /sys/block/*/queue/add_random; do
   echo 0 > "$part"
 done
-
-# DEC_CONTROL_FLAG_DISABLE_FAST_POC
-echo 4 > /sys/module/amvdec_h264/parameters/dec_control
 
 echo 1 > /sys/devices/system/cpu/cpufreq/ondemand/io_is_busy

@@ -18,7 +18,7 @@
 
 PKG_NAME="ffmpeg"
 # Current branch is: release/3.1-xbmc
-PKG_VERSION="33c167d"
+PKG_VERSION="9702d0d"
 PKG_ARCH="any"
 PKG_LICENSE="LGPLv2.1+"
 PKG_SITE="https://ffmpeg.org"
@@ -62,6 +62,7 @@ fi
 case "$TARGET_ARCH" in
   arm)
     CFLAGS="$CFLAGS -mthumb"
+    CFLAGS=$(echo "$CFLAGS" | sed 's/-Os/-O3/g')
     ;;
 esac
 
@@ -79,7 +80,7 @@ if [ "$DISPLAYSERVER" = "x11" ]; then
 fi
 
 pre_configure_target() {
-  cd $ROOT/$PKG_BUILD
+  cd $PKG_BUILD
   rm -rf .$TARGET_NAME
 
 # ffmpeg fails building for x86_64 with LTO support
@@ -125,7 +126,7 @@ configure_target() {
               --disable-doc \
               $FFMPEG_DEBUG \
               --enable-pic \
-              --pkg-config="$ROOT/$TOOLCHAIN/bin/pkg-config" \
+              --pkg-config="$TOOLCHAIN/bin/pkg-config" \
               --enable-optimizations \
               --disable-extra-warnings \
               --disable-ffprobe \

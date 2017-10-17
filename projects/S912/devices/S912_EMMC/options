@@ -1,0 +1,6 @@
+  # Kernel and u-boot options
+    case $SYSTEM in
+      KVIM2)
+        KERNEL_UBOOT_EXTRA_TARGET="kvim2.dtb"
+        ;;
+    esac

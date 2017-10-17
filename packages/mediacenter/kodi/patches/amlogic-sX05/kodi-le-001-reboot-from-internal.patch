@@ -6,7 +6,7 @@ index 9d29e01..cd5f1df 100644
  						<visible>System.CanReboot</visible>
  					</item>
  					<item>
-+						<label>Reboot from internal</label>
++						<label>Reboot from Android</label>
 +						<onclick>System.ExecWait("/usr/sbin/rebootfromnand")</onclick>
 +						<visible>System.CanReboot</visible>
 +					</item>
