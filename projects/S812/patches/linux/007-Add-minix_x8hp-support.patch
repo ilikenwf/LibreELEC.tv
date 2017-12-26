@@ -506,7 +506,7 @@ index 0000000..eb46cdd
 +            gpio_dat3 = "CARD_4";
 +            jtag_pin = "CARD_0";
 +            gpio_cd = "CARD_6";
-+            gpio_ro = "GPIOZ_15";
++//            gpio_ro = "GPIOZ_15";
 +            irq_in = <3>;
 +            irq_out = <5>;
 +            card_type = <5>; /* 0:unknown, 1:mmc card(include eMMC), 2:sd card(include tSD), 3:sdio device(ie:sdio-wifi), 4:SD combo (IO+mem) card, 5:NON sdio device(means sd/mmc card), other:reserved */

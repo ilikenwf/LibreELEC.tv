@@ -7,7 +7,7 @@ index 9d29e01..cd5f1df 100644
  					</item>
  					<item>
 +						<label>Reboot from Linux</label>
-+						<onclick>System.ExecWait("/usr/sbin/rebootfromrecovery")</onclick>
++						<onclick>System.ExecWait("/usr/sbin/rebootfromlinux")</onclick>
 +						<visible>System.CanReboot</visible>
 +					</item>
 +					<item>

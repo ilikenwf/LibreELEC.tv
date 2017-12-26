@@ -7,6 +7,7 @@
     TARGET_CPU="cortex-a9"
     TARGET_FLOAT="hard"
     TARGET_FPU="neon-fp16"
+    TARGET_FEATURES="32bit neon"
 
   # Bootloader to use (syslinux / u-boot / atv-bootloader / bcm2835-bootloader)
     BOOTLOADER="u-boot"
@@ -23,21 +24,21 @@
   # Kernel target
     KERNEL_TARGET="uImage"
 
-  # Build Android kernel image using mkbootimg
-    BUILD_ANDROID_BOOTIMG="yes"
-
   # Kernel extra targets to build
     case $SYSTEM in
       MXIII_Plus)
-        KERNEL_UBOOT_EXTRA_TARGET="meson8m2_n200C_2G.dtd meson8m2_n200C_2G.dtb meson8m2_n200C_1G.dtd meson8m2_n200C_1G.dtb meson8m2_n200_1G.dtd meson8m2_n200_1G.dtb meson8m2_n200_2G_1000.dtd meson8m2_n200_2G_1000.dtb meson8_k200b_1G_emmc_sdhc.dtd meson8_k200b_1G_emmc_sdhc.dtb meson8_k200b_1G_emmc_sdio.dtd meson8_k200b_1G_emmc_sdio.dtb meson8_k200b_2G_emmc_sdhc.dtd meson8_k200b_2G_emmc_sdhc.dtb meson8_k200b_2G_emmc_sdio.dtd meson8_k200b_2G_emmc_sdio.dtb"
+        KERNEL_UBOOT_EXTRA_TARGET="meson8m2_n200_1G.dtd meson8m2_n200_1G.dtb meson8m2_n200_2G.dtd meson8m2_n200_2G.dtb meson8m2_n200C_1G.dtd meson8m2_n200C_1G.dtb meson8m2_n200C_2G.dtd meson8m2_n200C_2G.dtb meson8_k200b_1G_emmc_sdhc.dtd meson8_k200b_1G_emmc_sdhc.dtb meson8_k200b_1G_emmc_sdio.dtd meson8_k200b_1G_emmc_sdio.dtb meson8_k200b_2G_emmc_sdhc.dtd meson8_k200b_2G_emmc_sdhc.dtb meson8_k200b_2G_emmc_sdio.dtd meson8_k200b_2G_emmc_sdio.dtb"
         ;;
       LAN_100)
-        KERNEL_UBOOT_EXTRA_TARGET="meson8m2_n200_2G.dtd meson8m2_n200_2G.dtb"
+        KERNEL_UBOOT_EXTRA_TARGET="meson8m2_n200_2G_LAN100.dtd meson8m2_n200_2G_LAN100.dtb meson8m2_n200C_2G_LAN100.dtd meson8m2_n200C_2G_LAN100.dtb"
         ;;
       X8H_Plus)
         KERNEL_UBOOT_EXTRA_TARGET="meson8m2_x8hp.dtd meson8m2_x8hp.dtb"
       ;;
     esac
+
+  # Build Android kernel image using mkbootimg
+    BUILD_ANDROID_BOOTIMG="yes"
 
   # Additional kernel make parameters (for example to specify the u-boot loadaddress)
     KERNEL_MAKE_EXTRACMD=""
@@ -48,7 +49,8 @@
   # Kernel to use. values can be:
   # default:  default mainline kernel
     LINUX="custom"
-    KERNEL_VERSION="b69865e"
+#    KERNEL_VERSION="4c08d72"
+    KERNEL_VERSION="1be06c2"
     KERNEL_URL="https://github.com/kszaq/linux/archive/$KERNEL_VERSION.tar.gz"
 
 ################################################################################
@@ -101,8 +103,9 @@
   # for a list of additinoal drivers see packages/linux-drivers
   # Space separated list is supported,
   # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
+#    ADDITIONAL_DRIVERS="RTL8192CU RTL8192DU RTL8192EU RTL8812AU"
     ADDITIONAL_DRIVERS="RTL8192CU RTL8192DU RTL8192EU RTL8812AU mt7610u \
-                        mt7601u-aml RTL8188EU-aml RTL8189ES-aml RTL8189FS-aml RTL8723BS-aml RTL8822BU-aml ssv6xxx-aml"
+                        mt7601u-aml RTL8188EU-aml RTL8189ES-aml RTL8189FS-aml RTL8723BS-aml RTL8723DS-aml RTL8822BU-aml ssv6xxx-aml"
 
   # additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
   # Space separated list is supported,
@@ -142,6 +145,7 @@
 
   # set the addon dirs
     ADDON_PATH="$ADDON_VERSION/WeTek_Play/$TARGET_ARCH"
+#    ADDON_SERVER_URL="http://kszaq.libreelec.tv/addons"
     ADDON_URL="$ADDON_SERVER_URL/$ADDON_PATH"
 
   # OEM packages for OEM's (yes / no)
