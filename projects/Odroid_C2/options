@@ -2,10 +2,12 @@
 # setup system defaults
 ################################################################################
 
+    TARGET_CPU="cortex-a53"
+
     case $TARGET_ARCH in
       aarch64)
-        TARGET_CPU_FLAGS="+crc+fp+simd"
-        ;;
+	TARGET_CPU_FLAGS="+crc+fp+simd"
+	;;
       arm)
         TARGET_CPU_FLAGS="+crc"
         TARGET_FPU="neon-fp-armv8"
