@@ -109,3 +109,7 @@
 
   # kernel image name
     KERNEL_NAME="KERNEL"
+
+  # OEM packages for OEM's (yes / no)
+    OEM_SUPPORT="yes"
+

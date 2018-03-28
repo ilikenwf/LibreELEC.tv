@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="reicastsa"
-PKG_VERSION="ca837e1"
+PKG_VERSION="ad0ec38"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/reicast/reicast-emulator"
@@ -45,7 +45,7 @@ make_target() {
 makeinstall_target() {
   
   mkdir -p $INSTALL/usr/bin
-  cp reicast.elf $INSTALL/usr/bin/reicast
+  #cp reicast.elf $INSTALL/usr/bin/reicast
   cp tools/reicast-joyconfig.py $INSTALL/usr/bin/
 
   mkdir -p $INSTALL/usr/config
