@@ -18,11 +18,11 @@ PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
 # Thanks to magicseb  Reicast SA now WORKS :D
-PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET mame2010 mame2014 vba-next libretro-beetle-pce-fast advancemame PPSSPPSDL emulationstation fbida reicastsa"
+PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET vba-next libretro-beetle-pce-fast advancemame PPSSPPSDL emulationstation reicastsa common-shaders scraper"
 
  
 # You can build some less used Libretro cores by using $LIBRETRO_EXTRA_CORES but you might run into size problems.
-#PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $LIBRETRO_EXTRA_CORES"
+#PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $LIBRETRO_EXTRA_CORES mame2010 mame2014"
 
 
 # Pegasus-FE works, but it is still in very early stage, if you enable make sure you have enough space on the partition.
@@ -30,7 +30,6 @@ PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET mame2010 mame2014 vba-next libretro-beet
 
 
 # These packages are experimental, they do not compile or have other problems, any help getting these to work is highly appreciated!.
-
 #PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET attract" 
 
 
@@ -40,20 +39,32 @@ make_target() {
 }
 
 makeinstall_target() {
+   
+  mkdir -p $INSTALL/etc/samba
+   cp $PKG_DIR/config/smb.conf $INSTALL/etc/samba
 
   mkdir -p $INSTALL/usr/config/
     cp -rf $PKG_DIR/config/* $INSTALL/usr/config/
     cp $PKG_DIR/autostart.sh $INSTALL/usr/config/autostart.sh
  
-mkdir -p $INSTALL/usr/bin/
+  mkdir -p $INSTALL/usr/bin/
     cp $PKG_DIR/bin/* $INSTALL/usr/bin/
+    chmod +x $INSTALL/usr/bin/*
 
-mkdir -p $INSTALL/usr/share/kodi/addons/
+  mkdir -p $INSTALL/usr/share/kodi/addons/
     cp -rf $PKG_DIR/addon/* $INSTALL/usr/share/kodi/addons/
 
+  mkdir -p $INSTALL/usr/share/retroarch-overlays
+    cp -r $PKG_DIR/overlay/* $INSTALL/usr/share/retroarch-overlays
+  
+  mkdir -p $INSTALL/usr/share/common-shaders
+    cp -r $PKG_DIR/shaders/* $INSTALL/usr/share/common-shaders
+    
+    mkdir -p $INSTALL/usr/share/libretro-database
+     touch $INSTALL/usr/share/libretro-database/dummy
 
-##this needs to be moved to filesystem, but put it here for easy testing. 
-#mkdir -p $INSTALL/usr/config/asound.conf
-#cp $PKG_DIR/asound.conf/asound.conf $INSTALL/usr/config/asound.conf/asound.conf
+##this needs to be moved to filesystem, but I put it here for easy testing. 
+  mkdir -p $INSTALL/usr/config/asound.conf
+    cp $PKG_DIR/asound.conf/asound.conf $INSTALL/usr/config/asound.conf/asound.conf
 
 }

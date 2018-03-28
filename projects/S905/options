@@ -42,7 +42,7 @@
         UBOOT_VERSION="lepotato"
         UBOOT_CONFIG="libretech_cc_defconfig"
         UBOOT_CONFIGFILE="boot.ini"
-        KERNEL_UBOOT_EXTRA_TARGET="gxl_p212_1g.dtb gxl_p212_2g.dtb"
+        KERNEL_UBOOT_EXTRA_TARGET="gxl_p212_1g_lepotato.dtb gxl_p212_2g_lepotato.dtb"
         ;;
       *)
         KERNEL_UBOOT_EXTRA_TARGET="gxbb_p200.dtb gxbb_p200_2G.dtb gxl_p212_1g.dtb gxl_p212_2g.dtb gxl_p230_2g.dtb"
@@ -111,7 +111,7 @@
   # Space separated list is supported,
   # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
     ADDITIONAL_DRIVERS="RTL8192CU RTL8192DU RTL8192EU RTL8812AU gpu-aml wetekdvb media_build \
-                        ap6xxx-aml mt7601u-aml mt7603u-aml qca9377-aml RTL8188EU-aml RTL8189ES-aml RTL8189FS-aml RTL8723BS-aml RTL8723DS-aml RTL8822BU-aml ssv6xxx-aml"
+                        ap6xxx-aml mt7601u-aml qca9377-aml RTL8188EU-aml RTL8189ES-aml RTL8189FS-aml RTL8723BS-aml RTL8723DS-aml RTL8822BU-aml ssv6xxx-aml fd628-aml"
 
   # additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
   # Space separated list is supported,
@@ -147,7 +147,7 @@
     EXTRA_DEPS_PKG="u-boot-tools"
 
   # set the addon dirs
-    ADDON_SERVER_URL="http://kszaq.libreelec.tv/addons"
+    ADDON_SERVER_URL="http://libreelec.adamg.co.uk/addons"
     ADDON_URL="$ADDON_SERVER_URL/$ADDON_PATH"
 
   # OEM packages for OEM's (yes / no)
